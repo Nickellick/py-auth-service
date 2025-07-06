@@ -1,0 +1,13 @@
+app:
+  host: "0.0.0.0"
+  port: 8000
+
+database:
+  url: "postgresql+asyncpg://postgres:password@localhost:5432/auth_service"
+  echo: false
+
+jwt:
+  secret_key: "YOUR_SUPER_SECRET_KEY"
+  algorithm: "HS256"
+  access_token_expire_minutes: 15
+  refresh_token_expire_days: 30

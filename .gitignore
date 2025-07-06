@@ -1,0 +1,13 @@
+.idea
+__pycache__/
+*.pyc
+.env
+venv/
+poetry.lock
+alembic/versions/*.pyc
+*.sqlite3
+__pypackages__/
+
+.DS_Store
+
+config.yaml
