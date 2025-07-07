@@ -1,11 +1,10 @@
 from pydantic import BaseModel, EmailStr
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
 
 class UserCreate(BaseModel):
     username: str
-    email: Optional[EmailStr]
+    email: EmailStr | None
     password: str
 
 class UserLogin(BaseModel):
@@ -15,9 +14,9 @@ class UserLogin(BaseModel):
 class UserRead(BaseModel):
     id: UUID
     username: str
-    email: Optional[EmailStr]
+    email: EmailStr | None
     is_active: bool
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
