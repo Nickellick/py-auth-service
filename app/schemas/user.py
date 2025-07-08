@@ -17,6 +17,7 @@ class UserRead(BaseModel):
     email: EmailStr | None
     is_active: bool
     created_at: datetime
+    refresh_token: str | None
 
     class Config:
         from_attributes = True
