@@ -1,0 +1,26 @@
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - auth_network
+
+  database:
+    image: postgres:17-alpine
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    networks:
+      - auth_network
+    environment:
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "auth_service"
+
+volumes:
+  auth_db_data:
+
+networks:
+  auth_network:
