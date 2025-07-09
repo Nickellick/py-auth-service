@@ -1,10 +1,14 @@
+import os
+
 from pathlib import Path
 
 from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict
 from pydantic_settings_yaml import YamlBaseSettings
 
-CONFIG_PATH = Path(__file__).parent / "config.yaml"
+CONFIG_FILE_NAME = os.environ.get("CONFIG_FILE_NAME", "config.yml")
+
+CONFIG_PATH = Path(__file__).parent / CONFIG_FILE_NAME
 
 class Database(BaseModel):
     dbms: str
