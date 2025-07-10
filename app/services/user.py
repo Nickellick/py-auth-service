@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import create_hash
 from app.dependencies.db import get_db
+from app.exceptions import TokenDataException, TokenAlreadyRevoked
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.user import UserRead
@@ -52,11 +53,11 @@ async def generate_jwt_for_user(user: User, request: Request, db: AsyncSession =
 async def verify_jwt(user: User, token: str, request: Request, db: AsyncSession = Depends) -> UserRead:
     token_data = decode(token, algorithm=config.jwt.algorithm, key=config.jwt.key, verify=True)
     if not token_data.get('refresh', False):
-        raise Exception("Invalid token data")
+        raise TokenDataException()
     if not (user_token := await db.get(RefreshToken, token_data['uid'])):
-        raise Exception("Invalid token data")
+        raise TokenDataException()
     if user_token.is_revoked:
-        raise Exception("Refresh token is revoked")
+        raise TokenAlreadyRevoked()
     if user_token.expires_at < datetime.datetime.now(datetime.UTC):
         user_token.revoked_at = datetime.datetime.now(datetime.UTC)
         user_token.is_revoked = True
