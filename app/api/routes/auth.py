@@ -4,9 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies.db import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserRead
+from app.schemas.user import UserCreate, UserLogin, UserRead, UserRefresh
 from app.core.security import create_hash, verify_hash
-from app.services.user import generate_jwt_for_user
+from app.services.user import generate_jwt_for_user, verify_jwt
 
 router = APIRouter()
 
@@ -29,3 +29,11 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
         password_hash=create_hash(user_in.password)
     )
     return await generate_jwt_for_user(user, request, db)
+
+
+@router.post("/refresh", response_model=UserRead)
+async def refresh(user_refresh: UserRefresh, request: Request, db: AsyncSession = Depends(get_db)) -> UserRead:
+    result = await db.execute(select(User).where(User.id == user_refresh.user_id))
+    if not (user := result.scalar()):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return await verify_jwt(user, user_refresh.token, request, db)

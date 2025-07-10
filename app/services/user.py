@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import Request, Depends
-from jwt import encode
+from jwt import encode, decode
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import create_hash
@@ -47,3 +47,18 @@ async def generate_jwt_for_user(user: User, request: Request, db: AsyncSession =
     response.access_token = access_token
     response.refresh_token = refresh_token
     return response
+
+
+async def verify_jwt(user: User, token: str, request: Request, db: AsyncSession = Depends) -> UserRead:
+    token_data = decode(token, algorithm=config.jwt.algorithm, key=config.jwt.key, verify=True)
+    if not token_data.get('refresh', False):
+        raise Exception("Invalid token data")
+    if not (user_token := await db.get(RefreshToken, token_data['uid'])):
+        raise Exception("Invalid token data")
+    if user_token.is_revoked:
+        raise Exception("Refresh token is revoked")
+    if user_token.expires_at < datetime.datetime.now(datetime.UTC):
+        user_token.revoked_at = datetime.datetime.now(datetime.UTC)
+        user_token.is_revoked = True
+        await db.commit()
+    return await generate_jwt_for_user(user, request, db)

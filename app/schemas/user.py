@@ -11,6 +11,10 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class UserRefresh(BaseModel):
+    username: str
+    token: str
+
 class UserRead(BaseModel):
     id: UUID
     username: str
